@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trusted Gateway - E2E Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .payment-form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .gateway-badge {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .gateway-badge img {
+      height: 30px;
+      margin: 0 10px;
+    }
+    .gateway-badge span {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #e3f2fd;
+      color: #1565c0;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      border-color: #1976d2;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+    }
+    .row {
+      display: flex;
+      gap: 15px;
+    }
+    .row .form-group {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .secure-notice {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 15px;
+      color: #4caf50;
+      font-size: 13px;
+    }
+    .secure-notice svg {
+      width: 16px;
+      height: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-form">
+    <span class="badge">TEST: Trusted Payment Gateway (No Attack)</span>
+    <h1>Secure Checkout</h1>
+
+    <div class="gateway-badge">
+      <span>Powered by Stripe</span>
+    </div>
+
+    <form id="paymentForm" data-testid="payment-form">
+      <div class="form-group">
+        <label for="cardholderName">Cardholder Name</label>
+        <input
+          type="text"
+          id="cardholderName"
+          name="cardholderName"
+          autocomplete="cc-name"
+          placeholder="John Doe"
+          data-testid="name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cardNumber">Card Number</label>
+        <input
+          type="text"
+          id="cardNumber"
+          name="cardNumber"
+          autocomplete="cc-number"
+          placeholder="1234 5678 9012 3456"
+          data-testid="card-number"
+          maxlength="19"
+          required
+        />
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="expiryDate">Expiry Date</label>
+          <input
+            type="text"
+            id="expiryDate"
+            name="expiryDate"
+            autocomplete="cc-exp"
+            placeholder="MM/YY"
+            data-testid="expiry"
+            maxlength="5"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input
+            type="password"
+            id="cvv"
+            name="cvv"
+            autocomplete="cc-csc"
+            placeholder="123"
+            data-testid="cvv"
+            maxlength="4"
+            required
+          />
+        </div>
+      </div>
+
+      <button type="submit" data-testid="submit-btn">Pay $149.00</button>
+
+      <div class="secure-notice">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+        <span>256-bit SSL Encrypted</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- LEGITIMATE SCRIPT - Sends data to trusted payment gateway -->
+  <script data-testid="trusted-payment-script">
+    // Legitimate payment processing
+    // Sends data ONLY to trusted payment gateway (Stripe)
+
+    (function() {
+      'use strict';
+
+      // Trusted payment gateway domains
+      const STRIPE_API = 'https://api.stripe.com/v1/tokens';
+      const PAYPAL_API = 'https://api.paypal.com/v2/checkout';
+
+      document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const cardData = {
+          'card[number]': formData.get('cardNumber'),
+          'card[exp_month]': formData.get('expiryDate')?.split('/')[0],
+          'card[exp_year]': formData.get('expiryDate')?.split('/')[1],
+          'card[cvc]': formData.get('cvv'),
+          'card[name]': formData.get('cardholderName')
+        };
+
+        console.log('[TRUSTED] Sending to Stripe...');
+
+        // Send to TRUSTED payment gateway (Stripe)
+        // This should NOT trigger FormJacking Guard
+        fetch(STRIPE_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Bearer pk_test_xxxxxxxx'
+          },
+          body: new URLSearchParams(cardData).toString()
+        }).then(response => {
+          console.log('[TRUSTED] Payment processed via Stripe');
+          alert('Payment successful! (Simulated)');
+        }).catch(err => {
+          // In test environment, this will fail but that's expected
+          console.log('[TRUSTED] Stripe simulation complete');
+          alert('Payment simulation complete');
+        });
+      });
+
+      // Card number formatting
+      document.getElementById('cardNumber').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(.{4})/g, '$1 ').trim();
+        e.target.value = value;
+      });
+
+      // Expiry date formatting
+      document.getElementById('expiryDate').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        e.target.value = value;
+      });
+    })();
+  </script>
+</body>
+</html>

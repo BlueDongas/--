@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Normal Payment - E2E Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .payment-form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      border-color: #4caf50;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+    .row {
+      display: flex;
+      gap: 15px;
+    }
+    .row .form-group {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .success-message {
+      display: none;
+      padding: 20px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      text-align: center;
+      color: #2e7d32;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-form">
+    <span class="badge">TEST: Normal Payment (No Attack)</span>
+    <h1>Secure Checkout</h1>
+
+    <form id="paymentForm" action="/api/payment" method="POST" data-testid="payment-form">
+      <div class="form-group">
+        <label for="cardholderName">Cardholder Name</label>
+        <input
+          type="text"
+          id="cardholderName"
+          name="cardholderName"
+          autocomplete="cc-name"
+          placeholder="John Doe"
+          data-testid="name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cardNumber">Card Number</label>
+        <input
+          type="text"
+          id="cardNumber"
+          name="cardNumber"
+          autocomplete="cc-number"
+          placeholder="1234 5678 9012 3456"
+          data-testid="card-number"
+          maxlength="19"
+          required
+        />
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="expiryDate">Expiry Date</label>
+          <input
+            type="text"
+            id="expiryDate"
+            name="expiryDate"
+            autocomplete="cc-exp"
+            placeholder="MM/YY"
+            data-testid="expiry"
+            maxlength="5"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input
+            type="password"
+            id="cvv"
+            name="cvv"
+            autocomplete="cc-csc"
+            placeholder="123"
+            data-testid="cvv"
+            maxlength="4"
+            required
+          />
+        </div>
+      </div>
+
+      <button type="submit" data-testid="submit-btn">Pay $99.00</button>
+    </form>
+
+    <div id="successMessage" class="success-message">
+      Payment successful! Your order has been placed.
+    </div>
+  </div>
+
+  <script>
+    // Normal payment submission - sends to same domain
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      // Simulate payment processing
+      console.log('[Normal Payment] Processing payment...');
+
+      // Submit to same domain (normal behavior)
+      fetch('/api/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: 99.00,
+          currency: 'USD',
+          // Card data is sent to same domain - this is normal
+          cardLast4: data.cardNumber.slice(-4),
+          timestamp: Date.now()
+        })
+      }).then(() => {
+        document.getElementById('paymentForm').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+      }).catch(err => {
+        console.log('Payment simulation complete');
+      });
+    });
+
+    // Card number formatting
+    document.getElementById('cardNumber').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      value = value.replace(/(.{4})/g, '$1 ').trim();
+      e.target.value = value;
+    });
+
+    // Expiry date formatting
+    document.getElementById('expiryDate').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2);
+      }
+      e.target.value = value;
+    });
+  </script>
+</body>
+</html>

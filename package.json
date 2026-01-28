@@ -1,0 +1,85 @@
+{
+  "name": "formjacking-guard",
+  "version": "1.0.0",
+  "description": "AI 기반 실시간 폼재킹 탐지 Chrome 확장 프로그램 (Clean Architecture)",
+  "main": "dist/background/index.js",
+  "scripts": {
+    "dev": "webpack --mode development --watch",
+    "build": "npm run type-check && webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "build:prod": "npm run type-check && webpack --mode production",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --max-warnings 0",
+    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --fix",
+    "format": "prettier --write 'src/**/*.{ts,json,css,html}' 'tests/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.{ts,json,css,html}' 'tests/**/*.ts'",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "clean": "rimraf dist",
+    "prepare": "husky install"
+  },
+  "keywords": [
+    "chrome-extension",
+    "formjacking",
+    "security",
+    "typescript",
+    "clean-architecture"
+  ],
+  "author": "AcePhers",
+  "license": "MIT",
+  "devDependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.26.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@babel/core": "^7.28.6",
+    "@babel/preset-env": "^7.28.6",
+    "@types/chrome": "^0.0.260",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.0",
+    "@types/puppeteer": "^5.4.7",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "assert": "^2.1.0",
+    "babel-jest": "^30.2.0",
+    "buffer": "^6.0.3",
+    "copy-webpack-plugin": "^12.0.0",
+    "css-loader": "^6.9.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "fake-indexeddb": "^6.2.5",
+    "fork-ts-checker-webpack-plugin": "^9.0.2",
+    "husky": "^9.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "process": "^0.11.10",
+    "puppeteer": "^24.36.0",
+    "rimraf": "^5.0.5",
+    "sharp": "^0.34.5",
+    "stream-browserify": "^3.0.0",
+    "style-loader": "^3.3.4",
+    "ts-jest": "^29.1.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "util": "^0.12.5",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "dexie": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

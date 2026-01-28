@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "FormJacking Guard",
+  "version": "1.0.0",
+  "description": "AI 기반 실시간 폼재킹 탐지로 온라인 결제 정보를 보호합니다",
+  "author": "AcePhers",
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "alarms",
+    "declarativeNetRequest"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background/index.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/injected.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/index.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-gray-16.png",
+      "48": "assets/icons/icon-gray-48.png",
+      "128": "assets/icons/icon-gray-128.png"
+    },
+    "default_title": "FormJacking Guard"
+  },
+
+  "icons": {
+    "16": "assets/icons/icon-green-16.png",
+    "48": "assets/icons/icon-green-48.png",
+    "128": "assets/icons/icon-green-128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "assets/icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
